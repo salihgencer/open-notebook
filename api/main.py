@@ -281,6 +281,13 @@ app.include_router(source_chat.router, prefix="/api", tags=["source-chat"])
 app.include_router(credentials.router, prefix="/api", tags=["credentials"])
 app.include_router(languages.router, prefix="/api", tags=["languages"])
 
+# Extensions (modular customizations — gracefully skipped if not installed)
+try:
+    from extensions.loader import load_extensions
+    load_extensions(app)
+except ImportError:
+    pass
+
 
 @app.get("/")
 async def root():
