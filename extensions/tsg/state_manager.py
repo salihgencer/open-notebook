@@ -122,9 +122,9 @@ async def update_company_meta(
         **kwargs: Ekstra güncellenecek alanlar.
     """
     # gazette_count artır
+    from open_notebook.database.repository import ensure_record_id
     await repo_query(
-        "UPDATE $cid SET gazette_count += 1",
-        {"cid": company_id},
+        f"UPDATE {company_id} SET gazette_count += 1",
     )
 
     # last_gazette_date ve last_gazette_no güncelle

@@ -88,8 +88,13 @@ async def process_gazette_file(
         event_type: str = triage_result.get("islem_turu", "diger")
         mersis_no: Optional[str] = triage_result.get("mersis_no")
 
-        # Adım 7 — Detay çıkarımı
-        detail_result = await detail_extract(announcement, event_type)
+        # Adım 7 — Detay çıkarımı (hata olursa triage sonuçlarıyla devam et)
+        try:
+            detail_result = await detail_extract(announcement, event_type)
+        except Exception as detail_err:
+            from loguru import logger
+            logger.warning(f"Detay extraction hatası, triage ile devam: {detail_err}")
+            detail_result = {"fields": {}, "persons": [], "events": []}
 
         # Adım 8 — Şirketi bul veya oluştur
         company_id = await find_or_create_company(

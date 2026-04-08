@@ -33,11 +33,14 @@ _DATE_PATTERN = re.compile(
 )
 _SAYI_PATTERN = re.compile(r"SAYI\s*:\s*(\d+)", re.IGNORECASE)
 
-# Şirket ilanı ayraç kalıbı
+# Şirket ilanı ayraç kalıbı (T.C. prefix'li ve prefix'siz varyantlar)
 _ANNOUNCEMENT_SPLIT_PATTERN = re.compile(
-    r"(?=T\.C\..*?TİCARET\s+SİCİLİ\s+MÜDÜRLÜĞÜ)",
+    r"(?=(?:T\.C\.\s+)?[\w\sİÇÖÜĞŞıçöüğş]+?Ticaret\s+Sicil[iİ]\s+Müdürlü[ğg]ü)",
     re.DOTALL | re.IGNORECASE | re.UNICODE,
 )
+
+# Türkçe karakter OCR normalizasyonu
+_TR_NORMALIZE = str.maketrans("ĞğIıİiÖöÜüŞşÇç", "GgIiIiOoUuSsCc")
 
 
 def validate_file_content(text: str) -> bool:
@@ -96,13 +99,20 @@ def split_announcements(text: str) -> List[str]:
     announcements = []
     for p in parts:
         stripped = p.strip()
-        # Boş veya çok kısa parçaları atla
         if not stripped or len(stripped) < 50:
             continue
-        # Gazete başlık bölümünü atla (T.C. ile başlamayan parçalar)
-        if not stripped.startswith("T.C."):
-            continue
-        announcements.append(stripped)
+        # İlan göstergesi var mı kontrol et (T.C. zorunlu değil)
+        has_indicator = any(
+            kw in stripped.lower()
+            for kw in ["ticaret sicil", "ilan sıra", "ilan sira", "ticaret unvanı", "ticaret ünvanı", "mersis"]
+        )
+        if has_indicator:
+            announcements.append(stripped)
+
+    # Hiç ilan bulunamadıysa tüm metni tek ilan olarak ver
+    if not announcements and len(text) > 100:
+        announcements = [text]
+
     return announcements
 
 
@@ -121,25 +131,21 @@ def find_company_announcement(
     if not company_name or not announcements:
         return None
 
-    # Arama için ilk 3 kelimeyi al
-    search_words = company_name.upper().split()[:3]
+    def normalize(s: str) -> str:
+        """Türkçe karakterleri ASCII'ye dönüştür (OCR toleransı)."""
+        return s.upper().translate(_TR_NORMALIZE)
+
+    search_norm = normalize(company_name)
+    search_words = search_norm.split()[:3]
     search_prefix = " ".join(search_words)
 
     for announcement in announcements:
-        # "Ticaret Unvanı:" alanını bul
-        unvan_match = re.search(
-            r"Ticaret\s+Unvanı\s*:\s*(.+?)(?:\n|$)",
-            announcement,
-            re.IGNORECASE | re.UNICODE,
-        )
-        if unvan_match:
-            unvan = unvan_match.group(1).strip().upper()
-            unvan_words = unvan.split()[:3]
-            unvan_prefix = " ".join(unvan_words)
-            if search_prefix in unvan_prefix or unvan_prefix in search_prefix:
-                return announcement
-        # Alternatif: genel metin içinde ara
-        if search_prefix in announcement.upper():
+        ann_norm = normalize(announcement)
+        # Tam eşleşme
+        if search_norm in ann_norm:
+            return announcement
+        # İlk 3 kelime eşleşme
+        if search_prefix in ann_norm:
             return announcement
 
     return None

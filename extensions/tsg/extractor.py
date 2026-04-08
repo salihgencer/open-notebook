@@ -86,14 +86,19 @@ def parse_json_response(text: str) -> Dict:
         raise ValueError("Boş yanıt metni")
 
     # Markdown kod bloklarını temizle (```json ... ``` veya ``` ... ```)
-    md_pattern = r"```(?:json)?\s*([\s\S]*?)\s*```"
+    # Kapanmayan code block'u da handle et
+    md_pattern = r"```(?:json)?\s*([\s\S]*?)(?:\s*```|$)"
     md_match = re.search(md_pattern, text)
     if md_match:
         json_str = md_match.group(1).strip()
-        try:
-            return json.loads(json_str)
-        except json.JSONDecodeError:
-            pass
+        # İçinden JSON çıkar
+        first = json_str.find("{")
+        last = json_str.rfind("}")
+        if first >= 0 and last > first:
+            try:
+                return json.loads(json_str[first:last + 1])
+            except json.JSONDecodeError:
+                pass
 
     # Düz JSON (ilk { ile son } arasını çıkar)
     stripped = text.strip()
