@@ -1,0 +1,9 @@
+name: briefing
+title: Briefing Document
+description: "Generates executive briefing from notebook sources"
+sections:
+  - executive_summary
+  - key_findings
+  - recommendations
+  - next_steps
+output_format: markdown

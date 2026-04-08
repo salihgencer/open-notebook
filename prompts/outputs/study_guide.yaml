@@ -1,0 +1,9 @@
+name: study_guide
+title: Study Guide
+description: "Generates a structured study guide from notebook sources"
+sections:
+  - overview
+  - key_concepts
+  - review_questions
+  - summary
+output_format: markdown

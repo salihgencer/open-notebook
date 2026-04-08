@@ -1,0 +1,6 @@
+name: faq
+title: FAQ
+description: "Generates FAQ from notebook sources"
+sections:
+  - questions_and_answers
+output_format: markdown

@@ -1,0 +1,7 @@
+name: timeline
+title: Timeline
+description: "Generates chronological timeline from notebook sources"
+sections:
+  - events
+  - context
+output_format: markdown

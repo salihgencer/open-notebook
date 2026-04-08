@@ -1,0 +1,1 @@
+"""Written output generation extension."""
