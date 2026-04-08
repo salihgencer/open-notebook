@@ -19,7 +19,7 @@ services:
       - DEFAULT_LOCALE=en
 
       # Extensions
-      - EXTENSIONS_ENABLED=auth,outputs,i18n
+      - EXTENSIONS_ENABLED=auth,outputs,i18n,tsg
     volumes:
       - ./extensions:/app/extensions
       - ./config.custom.yaml:/app/config.custom.yaml

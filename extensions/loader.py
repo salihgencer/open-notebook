@@ -82,3 +82,16 @@ def load_extensions(app: FastAPI) -> None:
         outputs_router = create_outputs_router(registry)
         app.include_router(outputs_router, prefix="/api/ext/outputs", tags=["ext-outputs"])
         logger.success(f"Outputs extension loaded ({registry.list_types()})")
+
+    # TSG Intelligence extension
+    if "tsg" in enabled:
+        from extensions.tsg.report_router import create_tsg_report_router
+        from extensions.tsg.chat_router import create_tsg_chat_router
+
+        tsg_report_router = create_tsg_report_router()
+        app.include_router(tsg_report_router, prefix="/api/ext/tsg", tags=["ext-tsg"])
+
+        tsg_chat_router = create_tsg_chat_router()
+        app.include_router(tsg_chat_router, prefix="/api/ext/tsg", tags=["ext-tsg"])
+
+        logger.success("TSG Intelligence extension loaded")
