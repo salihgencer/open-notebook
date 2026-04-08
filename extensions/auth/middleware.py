@@ -9,18 +9,33 @@ from extensions.auth.service import AuthService
 
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
+    """
+    JWT middleware that ONLY protects /api/ext/* routes.
+    Core open-notebook routes (/api/*) are left untouched — they use
+    the original PasswordAuthMiddleware.
+    """
+
     def __init__(
         self,
         app,
         auth_service: AuthService,
+        protected_prefix: str = "/api/ext/",
         excluded_paths: Optional[List[str]] = None,
     ):
         super().__init__(app)
         self.auth_service = auth_service
+        self.protected_prefix = protected_prefix
         self.excluded_paths = excluded_paths or []
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in self.excluded_paths:
+        path = request.url.path
+
+        # Only protect extension routes (/api/ext/*)
+        if not path.startswith(self.protected_prefix):
+            return await call_next(request)
+
+        # Skip excluded paths (login, register)
+        if path in self.excluded_paths:
             return await call_next(request)
 
         if request.method == "OPTIONS":
