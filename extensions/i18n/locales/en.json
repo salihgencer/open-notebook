@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "login_success": "Login successful",
+    "login_failed": "Invalid email or password",
+    "register_success": "Registration successful",
+    "email_exists": "Email already registered",
+    "token_expired": "Session expired, please login again",
+    "unauthorized": "You are not authorized to perform this action",
+    "account_disabled": "Account has been disabled"
+  },
+  "outputs": {
+    "generate_success": "Output generated successfully",
+    "no_sources": "This notebook has no sources with content",
+    "type_not_found": "Output type not found",
+    "generating": "Generating output..."
+  },
+  "common": {
+    "save_success": "Saved successfully",
+    "delete_success": "Deleted successfully",
+    "not_found": "Item not found",
+    "server_error": "An unexpected error occurred"
+  }
+}

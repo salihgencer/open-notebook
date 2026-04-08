@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "login_success": "Giriş başarılı",
+    "login_failed": "Geçersiz e-posta veya şifre",
+    "register_success": "Kayıt başarılı",
+    "email_exists": "Bu e-posta adresi zaten kayıtlı",
+    "token_expired": "Oturum süresi doldu, lütfen tekrar giriş yapın",
+    "unauthorized": "Bu işlemi gerçekleştirmek için yetkiniz yok",
+    "account_disabled": "Hesap devre dışı bırakılmış"
+  },
+  "outputs": {
+    "generate_success": "Çıktı başarıyla oluşturuldu",
+    "no_sources": "Bu not defterinde içerik bulunan kaynak yok",
+    "type_not_found": "Çıktı türü bulunamadı",
+    "generating": "Çıktı oluşturuluyor..."
+  },
+  "common": {
+    "save_success": "Başarıyla kaydedildi",
+    "delete_success": "Başarıyla silindi",
+    "not_found": "Öğe bulunamadı",
+    "server_error": "Beklenmeyen bir hata oluştu"
+  }
+}
