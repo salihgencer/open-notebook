@@ -142,3 +142,7 @@ specs/
 .harness/
 
 .mcp.json
+
+# Extensions custom config (contains secrets)
+.env.custom
+surreal_data/

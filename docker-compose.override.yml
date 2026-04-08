@@ -1,5 +1,9 @@
 services:
   open_notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: notebooklm-local:latest
     environment:
       # JWT Auth
       - JWT_SECRET=change-me-to-a-random-64-char-string
