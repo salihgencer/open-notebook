@@ -1,0 +1,53 @@
+name: genel
+description: "TSG ilanından detaylı yapısal bilgi çıkarır"
+prompt: |
+  Bu bir Türkiye Ticaret Sicil Gazetesi ilanıdır. İlan türü: {islem_turu}
+
+  İLAN METNİ:
+  {text}
+
+  OCR hatalarını düzelt (örn. "0" yerine "O", "1" yerine "I", bitişik kelimeler). Türkçe karakter hatalarına dikkat et.
+
+  SADECE aşağıdaki JSON yapısını döndür (başka metin ekleme):
+  {
+    "fields": [
+      {
+        "field_type": "sermaye|adres|faaliyet|temsil|denetci|sure|hesap_donemi",
+        "field_name": "alan adı",
+        "old_value": "eski değer veya null",
+        "new_value": "yeni değer",
+        "currency": "para birimi (sermaye için)",
+        "notes": "ek notlar"
+      }
+    ],
+    "persons": [
+      {
+        "ad_soyad": "kişi adı soyadı",
+        "person_type": "yonetim|ortak|denetci|tasfiye_memuru|konkordato_komiseri",
+        "unvan": "ünvan veya null",
+        "tc_kimlik": "TC kimlik no veya null",
+        "uyruk": "Türk|yabancı veya null",
+        "pay_orani": "pay oranı veya null",
+        "pay_tutari": "pay tutarı veya null",
+        "yetki": "yetki tanımı veya null",
+        "is_active": true
+      }
+    ],
+    "events": [
+      {
+        "event_type": "kurulus|sermaye|yonetim|adres|unvan|faaliyet|temsil|denetci|pay_devri|ana_sozlesme_tadili|ic_yonerge|sube_acilis|sube_kapanis|merkez_nakli|tasfiye|terkin|konkordato|bolunme|ek_tasfiye|ttk198|acentelik|diger",
+        "event_date": "YYYY-MM-DD veya null",
+        "description": "olay açıklaması",
+        "amount": "tutar veya null",
+        "currency": "para birimi veya null"
+      }
+    ],
+    "articles": [
+      {
+        "article_no": "madde numarası",
+        "article_title": "madde başlığı veya null",
+        "new_text": "yeni madde metni"
+      }
+    ],
+    "delil_belgesi": "mahkeme/noter bilgisi veya null"
+  }
