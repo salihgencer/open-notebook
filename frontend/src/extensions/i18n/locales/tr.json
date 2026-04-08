@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "notebooks": "Not Defterleri",
+    "settings": "Ayarlar",
+    "logout": "Çıkış"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "email": "E-posta",
+    "password": "Şifre",
+    "name": "Ad",
+    "logging_in": "Giriş yapılıyor...",
+    "registering": "Kayıt olunuyor...",
+    "no_account": "Hesabınız yok mu?",
+    "have_account": "Zaten hesabınız var mı?"
+  },
+  "outputs": {
+    "generate": "Oluştur",
+    "study_guide": "Çalışma Rehberi",
+    "faq": "SSS",
+    "timeline": "Zaman Çizelgesi",
+    "briefing": "Brifing Dokümanı",
+    "generating": "Oluşturuluyor...",
+    "select_type": "Çıktı türü seçin",
+    "no_sources": "Çıktı oluşturmak için kaynak ekleyin"
+  },
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "notebooks": "Notebooks",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "logging_in": "Logging in...",
+    "registering": "Registering...",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?"
+  },
+  "outputs": {
+    "generate": "Generate",
+    "study_guide": "Study Guide",
+    "faq": "FAQ",
+    "timeline": "Timeline",
+    "briefing": "Briefing Document",
+    "generating": "Generating...",
+    "select_type": "Select output type",
+    "no_sources": "Add sources to generate outputs"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}
