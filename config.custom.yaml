@@ -1,0 +1,14 @@
+extensions:
+  auth:
+    enabled: true
+    default_role: editor
+    allow_registration: true
+  outputs:
+    enabled: true
+    default_format: markdown
+  i18n:
+    enabled: true
+    default_locale: en
+    supported_locales:
+      - en
+      - tr
