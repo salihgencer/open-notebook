@@ -119,6 +119,15 @@ def parse_json_response(text: str) -> Dict:
         except json.JSONDecodeError:
             pass
 
+    # Son çare: tüm JSON benzeri blokları bul, en büyüğünü dene
+    json_blocks = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+    if json_blocks:
+        longest = max(json_blocks, key=len)
+        try:
+            return json.loads(longest)
+        except json.JSONDecodeError:
+            pass
+
     raise ValueError(f"Geçerli JSON bulunamadı. Yanıt: {text[:200]}...")
 
 
@@ -146,6 +155,7 @@ async def detail_extract(announcement_text: str, islem_turu: str) -> Dict:
     Aşama 4b: İlan metninden detaylı yapısal veri çıkarımı yapar.
 
     İşlem türüne özgü prompt varsa onu, yoksa genel.yaml'i kullanır.
+    JSON parse başarısızsa 1 kez retry yapar.
 
     Args:
         announcement_text: TSG ilan metni
@@ -154,11 +164,9 @@ async def detail_extract(announcement_text: str, islem_turu: str) -> Dict:
     Returns:
         fields, persons, events, articles, delil_belgesi alanlarını içeren dict
     """
-    # Önce işlem türüne özgü prompt dosyasını dene
     try:
         prompt_template = load_prompt(islem_turu)
     except FileNotFoundError:
-        # Yoksa genel prompt'u kullan
         prompt_template = load_prompt("genel")
 
     prompt = prompt_template.replace("{text}", announcement_text).replace(
@@ -166,4 +174,14 @@ async def detail_extract(announcement_text: str, islem_turu: str) -> Dict:
     )
 
     response_text = await call_llm(prompt)
-    return parse_json_response(response_text)
+    try:
+        return parse_json_response(response_text)
+    except ValueError:
+        # Retry: LLM'e düzeltme isteği
+        retry_prompt = (
+            "Aşağıdaki yanıtı geçerli bir JSON objesine dönüştür. "
+            "SADECE JSON döndür, başka metin ekleme.\n\n"
+            f"{response_text[:3000]}"
+        )
+        retry_text = await call_llm(retry_prompt)
+        return parse_json_response(retry_text)

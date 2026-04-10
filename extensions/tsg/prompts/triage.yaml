@@ -1,10 +1,9 @@
 name: triage
 description: "TSG ilanından temel bilgileri hızlıca çıkarır"
 prompt: |
-  Bu bir Türkiye Ticaret Sicil Gazetesi ilanıdır. Aşağıdaki bilgileri JSON olarak çıkar:
+  Ticaret Sicil Gazetesi ilanı. SADECE JSON döndür, başka metin EKLEME.
 
-  İLAN METNİ:
   {text}
 
-  SADECE şu alanları içeren JSON döndür (başka metin ekleme):
-  {"islem_turu": "kurulus|sermaye|yonetim|adres|unvan|faaliyet|temsil|denetci|pay_devri|ana_sozlesme_tadili|ic_yonerge|sube_acilis|sube_kapanis|merkez_nakli|tasfiye|terkin|konkordato|bolunme|ek_tasfiye|ttk198|acentelik|diger", "gazette_date": "YYYY-MM-DD", "gazette_no": "sayı", "ilan_kodu": "parantez içindeki kod", "sirket_unvani": "tam ünvan", "mersis_no": "varsa"}
+  JSON:
+  {"islem_turu":"kurulus|sermaye|yonetim|adres|unvan|faaliyet|temsil|denetci|pay_devri|ana_sozlesme_tadili|ic_yonerge|sube_acilis|sube_kapanis|merkez_nakli|tasfiye|terkin|konkordato|bolunme|ttk198|diger","gazette_date":"YYYY-MM-DD","gazette_no":"sayı","ilan_kodu":"(kodvarsa)","sirket_unvani":"tam ünvan","mersis_no":"varsa veya null"}

@@ -39,8 +39,26 @@ _ANNOUNCEMENT_SPLIT_PATTERN = re.compile(
     re.DOTALL | re.IGNORECASE | re.UNICODE,
 )
 
-# Türkçe karakter OCR normalizasyonu
-_TR_NORMALIZE = str.maketrans("ĞğIıİiÖöÜüŞşÇç", "GgIiIiOoUuSsCc")
+# Agresif OCR normalizasyonu — Türkçe + aksan varyantları + Romen karışmaları
+_NORMALIZE_MAP = str.maketrans({
+    # Türkçe → ASCII
+    'Ğ': 'G', 'ğ': 'g', 'İ': 'I', 'ı': 'i',
+    'Ö': 'O', 'ö': 'o', 'Ü': 'U', 'ü': 'u',
+    'Ş': 'S', 'ş': 's', 'Ç': 'C', 'ç': 'c',
+    # OCR aksan hataları
+    'Í': 'I', 'í': 'i', 'Ì': 'I', 'ì': 'i', 'Î': 'I', 'î': 'i',
+    'É': 'E', 'é': 'e', 'È': 'E', 'è': 'e', 'Ë': 'E', 'ë': 'e', 'Ê': 'E', 'ê': 'e',
+    'Ó': 'O', 'ó': 'o', 'Ò': 'O', 'ò': 'o', 'Ô': 'O', 'ô': 'o',
+    'Ú': 'U', 'ú': 'u', 'Ù': 'U', 'ù': 'u', 'Û': 'U', 'û': 'u',
+    'Á': 'A', 'á': 'a', 'À': 'A', 'à': 'a', 'Â': 'A', 'â': 'a',
+    # Romen karakter karışmaları
+    'Ș': 'S', 'ș': 's', 'Ț': 'T', 'ț': 't',
+})
+
+
+def normalize_ocr(text: str) -> str:
+    """Türkçe + OCR varyant karakterleri ASCII'ye dönüştür."""
+    return text.upper().translate(_NORMALIZE_MAP)
 
 
 def validate_file_content(text: str) -> bool:
@@ -131,21 +149,23 @@ def find_company_announcement(
     if not company_name or not announcements:
         return None
 
-    def normalize(s: str) -> str:
-        """Türkçe karakterleri ASCII'ye dönüştür (OCR toleransı)."""
-        return s.upper().translate(_TR_NORMALIZE)
-
-    search_norm = normalize(company_name)
-    search_words = search_norm.split()[:3]
-    search_prefix = " ".join(search_words)
+    search_norm = normalize_ocr(company_name)
+    # İlk 3 ve ilk 2 kelime varyantları
+    search_words = search_norm.split()
+    search_3 = " ".join(search_words[:3])
+    search_2 = " ".join(search_words[:2])
 
     for announcement in announcements:
-        ann_norm = normalize(announcement)
-        # Tam eşleşme
+        ann_norm = normalize_ocr(announcement)
         if search_norm in ann_norm:
             return announcement
-        # İlk 3 kelime eşleşme
-        if search_prefix in ann_norm:
+        if search_3 in ann_norm:
+            return announcement
+
+    # Kademe 2: ilk 2 kelime ile daha gevşek arama
+    for announcement in announcements:
+        ann_norm = normalize_ocr(announcement)
+        if search_2 in ann_norm:
             return announcement
 
     return None

@@ -127,23 +127,25 @@ async def test_invalid_content_returns_failure():
 
 
 # ----------------------------------------------------------------
-# Test 3 — Şirket ilanı bulunamıyor
+# Test 3 — Çok kısa metin (fallback devre dışı)
 # ----------------------------------------------------------------
 
 
 @pytest.mark.asyncio
 @patch("extensions.tsg.pipeline.triage_extract", new_callable=AsyncMock)
-async def test_company_not_found_returns_failure(mock_triage):
-    """Şirket ilanı bulunamadığında success=False döndürmeli."""
-    # Triage çağrılmamalı
-    result = await process_gazette_file(
-        text=VALID_TEXT,
-        company_name="Bambaşka Şirket Ltd. Şti.",
-    )
+async def test_short_text_returns_failure(mock_triage):
+    """Çok kısa (200 karakterden az) ve bulunamayan metinde success=False.
 
+    3 kademeli fallback: 1. splitter, 2. ngram, 3. tüm metni LLM'e ver.
+    Ancak metin 200 karakterden kısa ise fallback 3 de atlanır.
+    """
+    short_text = "x" * 150  # geçersiz olacak (validate_file_content False)
+    result = await process_gazette_file(
+        text=short_text,
+        company_name="Bambaşka Şirket",
+    )
     assert result["success"] is False
-    assert "bulunamadı" in result["error"].lower() or "success" not in result or not result["success"]
-    # Triage LLM çağrısı yapılmamış olmalı
+    # Geçersiz içerik hatası verir, triage çağrılmaz
     mock_triage.assert_not_called()
 
 

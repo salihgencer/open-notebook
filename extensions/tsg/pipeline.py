@@ -73,14 +73,31 @@ async def process_gazette_file(
         # Adım 4 — İlanları böl
         announcements = split_announcements(text)
 
-        # Adım 5 — Şirket ilanını bul (fallback: tam metin tarama)
+        # Adım 5 — Şirket ilanını bul (3 kademeli fallback)
+        from extensions.tsg.splitter import normalize_ocr
         announcement = find_company_announcement(announcements, company_name)
+
         if announcement is None:
-            # Fallback: şirket adı tam metinde geçiyor mu?
-            if company_name.upper() not in text.upper():
+            # Kademe 2: normalize_ocr ile tüm metinde satır bazlı arama
+            norm_name_2 = normalize_ocr(" ".join(company_name.split()[:2]))
+            norm_text = normalize_ocr(text)
+            if norm_name_2 in norm_text:
+                # Bulunan pozisyonun etrafındaki bloğu al (±50 satır)
+                lines = text.split("\n")
+                norm_lines = norm_text.split("\n")
+                for i, line in enumerate(norm_lines):
+                    if norm_name_2 in line:
+                        start = max(0, i - 10)
+                        end = min(len(lines), i + 50)
+                        announcement = "\n".join(lines[start:end])
+                        break
+
+        if announcement is None:
+            # Kademe 3: tüm metni LLM'e ver
+            if len(text) > 200:
+                announcement = text
+            else:
                 return {"success": False, "error": f"Şirket ilanı bulunamadı: {company_name}"}
-            # Tam metin üzerinden devam et
-            announcement = text
 
         # Adım 6 — Triage çıkarımı
         triage_result = await triage_extract(announcement)
