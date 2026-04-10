@@ -140,5 +140,12 @@ DEFINE INDEX idx_authority_company ON TABLE ext_authority_matrix COLUMNS company
 
 
 async def run_tsg_migration() -> None:
-    """TSG tablolarını ve indexlerini SurrealDB'de oluşturur."""
-    await repo_query(TSG_MIGRATION_SQL)
+    """TSG tablolarını ve indexlerini SurrealDB'de oluşturur (idempotent)."""
+    from loguru import logger
+    try:
+        await repo_query(TSG_MIGRATION_SQL)
+    except RuntimeError as e:
+        if "already exists" in str(e):
+            logger.debug(f"TSG tabloları zaten mevcut: {e}")
+        else:
+            raise
