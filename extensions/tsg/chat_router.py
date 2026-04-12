@@ -84,7 +84,7 @@ async def answer_factual(company_id: str, field: Optional[str]) -> Dict:
 
     if field and field != "null":
         result = await repo_query(
-            "SELECT * FROM ext_company_field WHERE company_id = $cid AND field_name = $field",
+            "SELECT * FROM ext_company_field WHERE company_id = $cid AND field_type = $field",
             {"cid": cid, "field": field},
         )
     else:
