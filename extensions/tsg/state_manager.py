@@ -170,7 +170,16 @@ async def update_company_fields(
         ilan_kodu: İlan kodu (opsiyonel).
     """
     for field_type, field_data in fields.items():
-        value = field_data.get("value") if isinstance(field_data, dict) else field_data
+        # LLM çıktısı çeşitli formatlarda gelebilir
+        if isinstance(field_data, dict):
+            value = field_data.get("value") or field_data.get("new_value") or field_data.get("deger") or field_data.get("detail") or str(field_data)
+        elif isinstance(field_data, str):
+            value = field_data
+        else:
+            value = str(field_data) if field_data else None
+
+        if not value or value == "None" or value == "{}":
+            continue
 
         # Mevcut kaydı kontrol et
         existing_results = await repo_query(
