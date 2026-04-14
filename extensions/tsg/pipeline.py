@@ -58,11 +58,12 @@ async def process_gazette_file(
     if not validate_file_content(text):
         return {"success": False, "error": "Geçersiz dosya içeriği"}
 
-    # Adım 2 — Tekrar tespiti
+    # Adım 2 — Tekrar tespiti (dosya + şirket çifti bazında)
     content_hash = file_hash(text)
-    if content_hash in _processed_hashes:
+    dedup_key = f"{content_hash}:{company_name}"
+    if dedup_key in _processed_hashes:
         return {"success": False, "error": "Duplicate dosya"}
-    _processed_hashes.add(content_hash)
+    _processed_hashes.add(dedup_key)
 
     try:
         # Adım 3 — Gazete metadatası
