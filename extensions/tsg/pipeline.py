@@ -94,11 +94,11 @@ async def process_gazette_file(
                         break
 
         if announcement is None:
-            # Kademe 3: tüm metni değil, şirket adının geçtiği bloğu LLM'e ver
-            # İlk kelimeyle bile eşleşme yoksa atla
+            # Kademe 3: şirket adının ilk kelimesi metinde var mı?
             norm_first = normalize_ocr(company_name.split()[0])
             norm_full = normalize_ocr(text)
             if norm_first in norm_full:
+                # Bulunan pozisyonun etrafındaki bloğu al
                 lines = text.split("\n")
                 norm_lines = norm_full.split("\n")
                 for i, line in enumerate(norm_lines):
@@ -109,10 +109,15 @@ async def process_gazette_file(
                         break
 
         if announcement is None:
-            return {"success": False, "error": f"Şirket ilanı bulunamadı: {company_name}"}
+            # Kademe 4: tüm metni ver ama max 4000 karakter ile sınırla
+            if len(text) > 200:
+                announcement = text[:4000]
+            else:
+                return {"success": False, "error": f"Şirket ilanı bulunamadı: {company_name}"}
 
-        # Adım 6 — Triage çıkarımı
-        triage_result = await triage_extract(announcement)
+        # Adım 6 — Triage çıkarımı (şirket adını context olarak ekle)
+        context_prefix = f"HEDEF ŞİRKET: {company_name}\n\n"
+        triage_result = await triage_extract(context_prefix + announcement)
 
         event_type: str = triage_result.get("islem_turu", "diger")
         mersis_no: Optional[str] = triage_result.get("mersis_no")
