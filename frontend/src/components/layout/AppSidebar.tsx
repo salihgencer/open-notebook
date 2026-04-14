@@ -41,6 +41,7 @@ import {
   Plus,
   Wrench,
   Command,
+  Building2,
 } from 'lucide-react'
 
 const getNavigation = (t: TranslationKeys) => [
@@ -61,6 +62,12 @@ const getNavigation = (t: TranslationKeys) => [
     title: t.navigation.create,
     items: [
       { name: t.navigation.podcasts, href: '/podcasts', icon: Mic },
+    ],
+  },
+  {
+    title: 'TSG Intelligence',
+    items: [
+      { name: 'Şirketler', href: '/tsg', icon: Building2 },
     ],
   },
   {
