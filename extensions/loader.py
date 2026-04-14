@@ -56,6 +56,7 @@ def load_extensions(app: FastAPI) -> None:
                     "/redoc",
                     "/api/ext/auth/login",
                     "/api/ext/auth/register",
+                    "/api/ext/tsg/",
                     "/api/auth/status",
                     "/api/config",
                 ],

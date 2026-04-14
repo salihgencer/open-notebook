@@ -1,48 +1,68 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import apiClient from '@/lib/api/client'
 import type { Company, CompanyCard, CompanyPerson, CompanyEvent, ChatResponse } from '../types'
 
-// Extension API'leri /api/ext/tsg altında — JWT token gerekiyor
-// apiClient zaten auth header ekliyor
+// TSG extension API'leri — /api/ext/tsg altında
+// apiClient /api prefix ekliyor, ext endpoint'leri direkt fetch ile çağırıyoruz
 
-async function fetchWithExtAuth<T>(url: string): Promise<T> {
-  // ext endpoint'leri için JWT token'ı localStorage'dan al
+async function tsgFetch<T>(path: string): Promise<T> {
   const token = localStorage.getItem('notebooklm_access_token')
-  const headers: Record<string, string> = {}
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  const response = await apiClient.get<T>(url, {
-    baseURL: undefined, // override apiClient default
-    headers,
-  })
-  return response.data
+
+  // open-notebook password auth (localStorage auth-storage'dan)
+  const authStorage = localStorage.getItem('auth-storage')
+  if (authStorage && !token) {
+    try {
+      const { state } = JSON.parse(authStorage)
+      if (state?.password) {
+        headers['Authorization'] = `Bearer ${state.password}`
+      }
+    } catch {}
+  }
+
+  const res = await fetch(`/api/ext/tsg${path}`, { headers })
+  if (!res.ok) throw new Error(`TSG API error: ${res.status}`)
+  return res.json()
 }
 
-async function postWithExtAuth<T>(url: string, data: unknown): Promise<T> {
+async function tsgPost<T>(path: string, data: unknown): Promise<T> {
   const token = localStorage.getItem('notebooklm_access_token')
-  const headers: Record<string, string> = {}
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  const response = await apiClient.post<T>(url, data, {
-    baseURL: undefined,
+  const authStorage = localStorage.getItem('auth-storage')
+  if (authStorage && !token) {
+    try {
+      const { state } = JSON.parse(authStorage)
+      if (state?.password) {
+        headers['Authorization'] = `Bearer ${state.password}`
+      }
+    } catch {}
+  }
+
+  const res = await fetch(`/api/ext/tsg${path}`, {
+    method: 'POST',
     headers,
+    body: JSON.stringify(data),
   })
-  return response.data
+  if (!res.ok) throw new Error(`TSG API error: ${res.status}`)
+  return res.json()
 }
 
 export function useCompanies() {
   return useQuery({
     queryKey: ['tsg', 'companies'],
-    queryFn: () => fetchWithExtAuth<Company[]>('/api/ext/tsg/companies'),
+    queryFn: () => tsgFetch<Company[]>('/companies'),
   })
 }
 
 export function useCompanyCard(companyId: string) {
   return useQuery({
     queryKey: ['tsg', 'company', companyId, 'card'],
-    queryFn: () => fetchWithExtAuth<CompanyCard>(`/api/ext/tsg/companies/${companyId}/card`),
+    queryFn: () => tsgFetch<CompanyCard>(`/companies/${encodeURIComponent(companyId)}/card`),
     enabled: !!companyId,
   })
 }
@@ -52,7 +72,7 @@ export function useCompanyPersons(companyId: string, personType?: string) {
     queryKey: ['tsg', 'company', companyId, 'persons', personType],
     queryFn: () => {
       const params = personType ? `?person_type=${personType}` : ''
-      return fetchWithExtAuth<CompanyPerson[]>(`/api/ext/tsg/companies/${companyId}/persons${params}`)
+      return tsgFetch<CompanyPerson[]>(`/companies/${encodeURIComponent(companyId)}/persons${params}`)
     },
     enabled: !!companyId,
   })
@@ -63,7 +83,7 @@ export function useCompanyTimeline(companyId: string, eventType?: string) {
     queryKey: ['tsg', 'company', companyId, 'timeline', eventType],
     queryFn: () => {
       const params = eventType ? `?event_type=${eventType}` : ''
-      return fetchWithExtAuth<CompanyEvent[]>(`/api/ext/tsg/companies/${companyId}/timeline${params}`)
+      return tsgFetch<CompanyEvent[]>(`/companies/${encodeURIComponent(companyId)}/timeline${params}`)
     },
     enabled: !!companyId,
   })
@@ -72,6 +92,6 @@ export function useCompanyTimeline(companyId: string, eventType?: string) {
 export function useTsgChat() {
   return useMutation({
     mutationFn: (data: { question: string; company_id: string }) =>
-      postWithExtAuth<ChatResponse>('/api/ext/tsg/chat', data),
+      tsgPost<ChatResponse>('/chat', data),
   })
 }

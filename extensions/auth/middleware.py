@@ -34,9 +34,10 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         if not path.startswith(self.protected_prefix):
             return await call_next(request)
 
-        # Skip excluded paths (login, register)
-        if path in self.excluded_paths:
-            return await call_next(request)
+        # Skip excluded paths (exact match or prefix match with /)
+        for ep in self.excluded_paths:
+            if path == ep or (ep.endswith("/") and path.startswith(ep)):
+                return await call_next(request)
 
         if request.method == "OPTIONS":
             return await call_next(request)
